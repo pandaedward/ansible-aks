@@ -1,0 +1,46 @@
+---
+- name: Create Azure Kubernetes Service
+  hosts: localhost
+  connection: local
+  gather_facts: false
+#   environment:
+#     AZURE_PROFILE: kube-non-prod
+  vars:
+    azure_profile: kube-non-prod
+    state: absent
+    resource_group: kube-non-prod-rg
+    location: australiaeast
+    aks_name: kube-non-prod
+    username: ublradmin
+    ssh_key: "{{ ssh_key }}"
+    client_id: "{{ client_id }}"
+    client_secret: "{{ client_secret }}"
+  tasks:
+#   - name: Create a resource group
+#     azure_rm_resourcegroup:
+#       name: "{{ resource_group }}"
+#       profile: "{{ azure_profile }}"
+ #      location: "{{ location }}" 
+ #      state: "{{ state }}"
+
+  - name: Create a managed Azure Container Services (AKS) cluster
+    azure_rm_aks:
+      name: "{{ aks_name }}"
+      location: "{{ location }}"
+      profile: "{{ azure_profile }}"
+      resource_group: "{{ resource_group }}"
+      dns_prefix: "{{ aks_name }}"
+      api_profile: latest
+      linux_profile:
+        admin_username: "{{ username }}"
+        ssh_key: "{{ ssh_key }}"
+      service_principal:
+        client_id: "{{ client_id }}"
+        client_secret: "{{ client_secret }}"
+      agent_pool_profiles:
+        - name: "{{ aks_name }}"
+          count: 2
+          vm_size: "{{ sku }}"
+      tags:
+        Environment: "{{ aks_name }}"
+      state: "{{ state }}"
